@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Permit Request</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #161820;
+    --surface2: #1e2028;
+    --border: #2a2d38;
+    --accent: #f0a500;
+    --accent2: #e07b00;
+    --text: #e8eaf0;
+    --muted: #6b7080;
+    --success: #3dd68c;
+    --danger: #ff5c5c;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    padding: 16px 16px 120px;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .header-icon {
+    width: 42px; height: 42px;
+    background: var(--accent);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+  }
+  .header-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 0.5px;
+  }
+  .header-sub {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 2px;
+  }
+
+  /* Progress */
+  .progress-wrap {
+    margin-bottom: 20px;
+  }
+  .progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .progress-bar-outer {
+    height: 4px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-bar-inner {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+
+  /* Section */
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  /* Field */
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .field-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .field-label .req { color: var(--accent); font-size: 10px; }
+
+  input[type="text"], input[type="number"], textarea, select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--accent);
+  }
+  input.error, textarea.error {
+    border-color: var(--danger);
+  }
+  .error-msg {
+    color: var(--danger);
+    font-size: 11px;
+    margin-top: 4px;
+    display: none;
+  }
+
+  /* Toggle buttons */
+  .toggle-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .toggle-btn {
+    flex: 1;
+    min-width: 80px;
+    padding: 9px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .toggle-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #000;
+    font-weight: 700;
+  }
+  .toggle-btn:active { opacity: 0.8; }
+
+  /* Custom input reveal */
+  .custom-input-wrap {
+    margin-top: 10px;
+    display: none;
+  }
+  .custom-input-wrap.visible { display: block; }
+
+  /* Axle section */
+  #axle-section {
+    display: none;
+  }
+  #axle-section.visible {
+    display: block;
+  }
+
+  /* Route textarea */
+  textarea {
+    resize: none;
+    height: 72px;
+  }
+
+  /* Hint */
+  .hint {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 5px;
+    line-height: 1.5;
+  }
+
+  /* Submit button */
+  .submit-wrap {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    padding: 12px 16px;
+    background: linear-gradient(to top, var(--bg) 70%, transparent);
+    z-index: 100;
+  }
+  .submit-btn {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    border: none;
+    border-radius: var(--radius);
+    color: #000;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .submit-btn:active { transform: scale(0.98); opacity: 0.9; }
+  .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 14px 0;
+  }
+
+  /* Success overlay */
+  .success-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 32px;
+    z-index: 200;
+  }
+  .success-overlay.show { display: flex; }
+  .success-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    animation: pop 0.5s ease;
+  }
+  .success-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--success);
+    margin-bottom: 8px;
+  }
+  .success-sub { color: var(--muted); line-height: 1.6; }
+
+  @keyframes pop {
+    0% { transform: scale(0); }
+    70% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-icon">🚛</div>
+  <div>
+    <div class="header-title">PERMIT REQUEST</div>
+    <div class="header-sub">OS/OW — Fill all fields below</div>
+  </div>
+</div>
+
+<!-- Progress -->
+<div class="progress-wrap">
+  <div class="progress-labels">
+    <span id="progress-label">Step 1 of 4</span>
+    <span id="progress-pct">0%</span>
+  </div>
+  <div class="progress-bar-outer">
+    <div class="progress-bar-inner" id="progress-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<!-- SECTION 1: Commodity -->
+<div class="section">
+  <div class="section-label">📦 Commodity</div>
+  <div class="field">
+    <div class="field-label">What are you hauling? <span class="req">*</span></div>
+    <input type="text" id="commodity" placeholder="e.g. Front loader, Excavator, Generator…"/>
+    <div class="hint">Describe the load type</div>
+    <div class="error-msg" id="err-commodity">Please enter the commodity</div>
+  </div>
+</div>
+
+<!-- SECTION 2: Dimensions -->
+<div class="section">
+  <div class="section-label">📐 Dimensions</div>
+
+  <!-- Width -->
+  <div class="field">
+    <div class="field-label">Width <span class="req">*</span></div>
+    <div class="toggle-group">
+      <div class="toggle-btn" id="width-legal" onclick="selectToggle('width','Legal')">✅ Legal</div>
+      <div class="toggle-btn" id="width-custom" onclick="selectToggle('width','custom')">✏️ Custom</div>
+    </div>
+    <div class="custom-input-wrap" id="width-input-wrap">
+      <input type="text" id="width-value" placeholder="e.g. 14'6&quot;  (min 8')"/>
+    </div>
+    <div class="error-msg" id="err-width">Please select or enter width</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Height -->
+  <div class="field">
+    <div class="field-label">Height <span class="req">*</span></div>
+    <div class="toggle-group">
+      <div class="toggle-btn" id="height-legal" onclick="selectToggle('height','Legal')">✅ Legal</div>
+      <div class="toggle-btn" id="height-custom" onclick="selectToggle('height','custom')">✏️ Custom</div>
+    </div>
+    <div class="custom-input-wrap" id="height-input-wrap">
+      <input type="text" id="height-value" placeholder="e.g. 13'6&quot;  (min 11')"/>
+    </div>
+    <div class="error-msg" id="err-height">Please select or enter height</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Length -->
+  <div class="field">
+    <div class="field-label">Length in the well <span class="req">*</span></div>
+    <div class="toggle-group">
+      <div class="toggle-btn" id="length-standard" onclick="selectToggle('length','Standard')">✅ Standard</div>
+      <div class="toggle-btn" id="length-extended" onclick="selectToggle('length','extended')">↔️ Extended</div>
+    </div>
+    <div class="custom-input-wrap" id="length-input-wrap">
+      <input type="text" id="length-value" placeholder="e.g. 53'  (min 29')"/>
+    </div>
+    <div class="error-msg" id="err-length">Please select or enter length</div>
+  </div>
+</div>
+
+<!-- SECTION 3: Weight -->
+<div class="section">
+  <div class="section-label">⚖️ Weight</div>
+  <div class="field">
+    <div class="field-label">Weight category <span class="req">*</span></div>
+    <div class="toggle-group">
+      <div class="toggle-btn" id="weight-legal" onclick="selectWeight('Legal')">✅ Legal</div>
+      <div class="toggle-btn" id="weight-overweight" onclick="selectWeight('Overweight')">⚠️ Overweight</div>
+    </div>
+    <div class="error-msg" id="err-weight">Please select weight category</div>
+  </div>
+
+  <!-- Axle weights (shown only if Overweight) -->
+  <div id="axle-section">
+    <div class="divider"></div>
+    <div class="field">
+      <div class="field-label">Steer axle weight (lbs) <span class="req">*</span></div>
+      <input type="number" id="steer" placeholder="e.g. 13100"/>
+      <div class="error-msg" id="err-steer">Please enter steer axle weight</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Drives axle weight (lbs) <span class="req">*</span></div>
+      <input type="number" id="drives" placeholder="e.g. 35000"/>
+      <div class="error-msg" id="err-drives">Please enter drives axle weight</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Trailer axle weight (lbs) <span class="req">*</span></div>
+      <input type="number" id="trailer" placeholder="e.g. 41000"/>
+      <div class="error-msg" id="err-trailer">Please enter trailer axle weight</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 4: Route -->
+<div class="section">
+  <div class="section-label">🗺️ Route Preference</div>
+  <div class="field">
+    <div class="toggle-group">
+      <div class="toggle-btn" id="route-nopref" onclick="selectRoute('No preference')">🔀 No preference</div>
+      <div class="toggle-btn" id="route-custom" onclick="selectRoute('custom')">✏️ My route</div>
+    </div>
+    <div class="custom-input-wrap" id="route-input-wrap">
+      <textarea id="route-value" placeholder="e.g. I-10 W → TX-18 → US-285"></textarea>
+    </div>
+    <div class="error-msg" id="err-route">Please choose a route option</div>
+  </div>
+</div>
+
+<!-- Submit -->
+<div class="submit-wrap">
+  <button class="submit-btn" id="submit-btn" onclick="submitForm()">
+    🚛 SUBMIT PERMIT REQUEST
+  </button>
+</div>
+
+<!-- Success overlay -->
+<div class="success-overlay" id="success-overlay">
+  <div class="success-icon">✅</div>
+  <div class="success-title">Request Submitted!</div>
+  <div class="success-sub">Your permit request has been sent to dispatch.<br>We'll process it shortly.</div>
+</div>
+
+<script>
+  const tg = window.Telegram.WebApp;
+  tg.ready();
+  tg.expand();
+
+  // Apply Telegram theme colors if available
+  if (tg.colorScheme === 'light') {
+    document.documentElement.style.setProperty('--bg', '#f5f5f5');
+    document.documentElement.style.setProperty('--surface', '#ffffff');
+    document.documentElement.style.setProperty('--surface2', '#f0f0f0');
+    document.documentElement.style.setProperty('--border', '#e0e0e0');
+    document.documentElement.style.setProperty('--text', '#1a1a1a');
+    document.documentElement.style.setProperty('--muted', '#888888');
+  }
+
+  // State
+  const state = {
+    width: null, height: null, length: null,
+    weight: null, route: null
+  };
+
+  // ── Toggle helpers ──────────────────────────────────────────────────────────
+
+  function selectToggle(field, value) {
+    const isCustom = (value === 'custom' || value === 'extended');
+    const prefix = field === 'length' ? 'length' : field;
+    const btnId  = field === 'length'
+      ? (isCustom ? 'length-extended' : 'length-standard')
+      : (isCustom ? `${field}-custom`  : `${field}-legal`);
+
+    // Reset both buttons
+    document.querySelectorAll(`[id^="${prefix}-"]`).forEach(b => {
+      if (b.classList.contains('toggle-btn')) b.classList.remove('active');
+    });
+    document.getElementById(btnId).classList.add('active');
+
+    const wrap = document.getElementById(`${field}-input-wrap`);
+    if (isCustom) {
+      wrap.classList.add('visible');
+      state[field] = '__custom__';
+    } else {
+      wrap.classList.remove('visible');
+      state[field] = value;
+    }
+    hideErr(field);
+    updateProgress();
+  }
+
+  function selectWeight(value) {
+    document.getElementById('weight-legal').classList.remove('active');
+    document.getElementById('weight-overweight').classList.remove('active');
+    document.getElementById(`weight-${value.toLowerCase()}`).classList.add('active');
+    state.weight = value;
+    const axle = document.getElementById('axle-section');
+    if (value === 'Overweight') {
+      axle.classList.add('visible');
+    } else {
+      axle.classList.remove('visible');
+      ['steer','drives','trailer'].forEach(f => document.getElementById(f).value = '');
+    }
+    hideErr('weight');
+    updateProgress();
+  }
+
+  function selectRoute(value) {
+    document.getElementById('route-nopref').classList.remove('active');
+    document.getElementById('route-custom').classList.remove('active');
+    const wrap = document.getElementById('route-input-wrap');
+    if (value === 'custom') {
+      document.getElementById('route-custom').classList.add('active');
+      wrap.classList.add('visible');
+      state.route = '__custom__';
+    } else {
+      document.getElementById('route-nopref').classList.add('active');
+      wrap.classList.remove('visible');
+      state.route = value;
+    }
+    hideErr('route');
+    updateProgress();
+  }
+
+  // ── Progress ────────────────────────────────────────────────────────────────
+
+  function countFilled() {
+    let n = 0;
+    if (document.getElementById('commodity').value.trim()) n++;
+    if (state.width && (state.width !== '__custom__' || document.getElementById('width-value').value.trim())) n++;
+    if (state.height && (state.height !== '__custom__' || document.getElementById('height-value').value.trim())) n++;
+    if (state.length && (state.length !== '__custom__' || document.getElementById('length-value').value.trim())) n++;
+    if (state.weight) n++;
+    if (state.route && (state.route !== '__custom__' || document.getElementById('route-value').value.trim())) n++;
+    return n;
+  }
+
+  function updateProgress() {
+    const total = 6;
+    const filled = countFilled();
+    const pct = Math.round(filled / total * 100);
+    document.getElementById('progress-bar').style.width = pct + '%';
+    document.getElementById('progress-pct').textContent = pct + '%';
+    document.getElementById('progress-label').textContent = `Step ${Math.min(filled+1, total)} of ${total}`;
+  }
+
+  // Live progress on typing
+  document.querySelectorAll('input, textarea').forEach(el => {
+    el.addEventListener('input', updateProgress);
+  });
+
+  // ── Validation ──────────────────────────────────────────────────────────────
+
+  function showErr(field, msg) {
+    const el = document.getElementById('err-' + field);
+    if (el) { if (msg) el.textContent = msg; el.style.display = 'block'; }
+    const inp = document.getElementById(field) || document.getElementById(field + '-value');
+    if (inp) inp.classList.add('error');
+  }
+
+  function hideErr(field) {
+    const el = document.getElementById('err-' + field);
+    if (el) el.style.display = 'none';
+    const inp = document.getElementById(field) || document.getElementById(field + '-value');
+    if (inp) inp.classList.remove('error');
+  }
+
+  function parseFeet(text) {
+    const m = text.trim().match(/^(\d+(?:\.\d+)?)/);
+    return m ? parseFloat(m[1]) : null;
+  }
+
+  function validateForm() {
+    let ok = true;
+
+    // Commodity
+    if (!document.getElementById('commodity').value.trim()) {
+      showErr('commodity'); ok = false;
+    } else hideErr('commodity');
+
+    // Width
+    if (!state.width) { showErr('width'); ok = false; }
+    else if (state.width === '__custom__') {
+      const v = document.getElementById('width-value').value.trim();
+      if (!v) { showErr('width', 'Please enter a width value'); ok = false; }
+      else {
+        const ft = parseFeet(v);
+        if (ft === null || ft < 8) { showErr('width', "Width must be at least 8'"); ok = false; }
+        else hideErr('width');
+      }
+    } else hideErr('width');
+
+    // Height
+    if (!state.height) { showErr('height'); ok = false; }
+    else if (state.height === '__custom__') {
+      const v = document.getElementById('height-value').value.trim();
+      if (!v) { showErr('height', 'Please enter a height value'); ok = false; }
+      else {
+        const ft = parseFeet(v);
+        if (ft === null || ft < 11) { showErr('height', "Height must be at least 11'"); ok = false; }
+        else hideErr('height');
+      }
+    } else hideErr('height');
+
+    // Length
+    if (!state.length) { showErr('length'); ok = false; }
+    else if (state.length === '__custom__') {
+      const v = document.getElementById('length-value').value.trim();
+      if (!v) { showErr('length', 'Please enter a length value'); ok = false; }
+      else {
+        const ft = parseFeet(v);
+        if (ft === null || ft < 29) { showErr('length', "Length must be at least 29'"); ok = false; }
+        else hideErr('length');
+      }
+    } else hideErr('length');
+
+    // Weight
+    if (!state.weight) { showErr('weight'); ok = false; }
+    else {
+      hideErr('weight');
+      if (state.weight === 'Overweight') {
+        ['steer','drives','trailer'].forEach(ax => {
+          const v = document.getElementById(ax).value.trim();
+          if (!v || isNaN(parseInt(v))) { showErr(ax); ok = false; }
+          else hideErr(ax);
+        });
+      }
+    }
+
+    // Route
+    if (!state.route) { showErr('route'); ok = false; }
+    else if (state.route === '__custom__') {
+      const v = document.getElementById('route-value').value.trim();
+      if (!v) { showErr('route', 'Please type your route'); ok = false; }
+      else hideErr('route');
+    } else hideErr('route');
+
+    return ok;
+  }
+
+  // ── Build payload ───────────────────────────────────────────────────────────
+
+  function buildPayload() {
+    const get = id => document.getElementById(id).value.trim();
+
+    const width  = state.width  === '__custom__' ? get('width-value')  : state.width;
+    const height = state.height === '__custom__' ? get('height-value') : state.height;
+    const length = state.length === '__custom__' ? get('length-value') : state.length;
+    const route  = state.route  === '__custom__' ? get('route-value')  : state.route;
+
+    const payload = {
+      commodity: get('commodity'),
+      width, height, length,
+      weight: state.weight,
+      route,
+    };
+
+    if (state.weight === 'Overweight') {
+      payload.steer   = get('steer');
+      payload.drives  = get('drives');
+      payload.trailer = get('trailer');
+      const total = parseInt(payload.steer||0) + parseInt(payload.drives||0) + parseInt(payload.trailer||0);
+      payload.gross = total.toLocaleString() + ' lbs';
+    }
+
+    return payload;
+  }
+
+  // ── Submit ──────────────────────────────────────────────────────────────────
+
+  function submitForm() {
+    if (!validateForm()) {
+      // Scroll to first error
+      const firstErr = document.querySelector('.error-msg[style*="block"]');
+      if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = '⏳ Sending…';
+
+    const payload = buildPayload();
+    tg.sendData(JSON.stringify(payload));
+
+    // Show success
+    setTimeout(() => {
+      document.getElementById('success-overlay').classList.add('show');
+      setTimeout(() => tg.close(), 2000);
+    }, 300);
+  }
+</script>
+</body>
+</html>
