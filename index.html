@@ -2,665 +2,775 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>Permit Request</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600&display=swap');
+:root {
+  --bg:            #070809;
+  --surface:       rgba(20,20,22,0.96);
+  --text:          #f2f2f2;
+  --muted:         #8a9099;
+  --yellow:        #ffd400;
+  --yellow-light:  #ffe76a;
+  --yellow-dim:    rgba(255,212,0,0.10);
+  --border:        rgba(255,212,0,0.11);
+  --border-focus:  rgba(255,212,0,0.48);
+  --success:       #3ecf72;
+  --danger:        #ff4d4d;
+  --r:             22px;
+}
 
-  :root {
-    --bg: #0d0f14;
-    --surface: #161820;
-    --surface2: #1e2028;
-    --border: #2a2d38;
-    --accent: #f0a500;
-    --accent2: #e07b00;
-    --text: #e8eaf0;
-    --muted: #6b7080;
-    --success: #3dd68c;
-    --danger: #ff5c5c;
-    --radius: 12px;
-  }
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html { -webkit-text-size-adjust:100%; }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: Inter, system-ui, sans-serif;
+  background:
+    radial-gradient(ellipse 80% 35% at 50% 0%, rgba(255,212,0,0.065) 0%, transparent 100%),
+    var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 14px 14px 0;
+  overflow-x: hidden;
+}
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    min-height: 100vh;
-    padding: 16px 16px 120px;
-  }
+.container {
+  max-width: 540px;
+  margin: 0 auto;
+  padding-bottom: 108px;
+}
 
-  /* Header */
-  .header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border);
-  }
-  .header-icon {
-    width: 42px; height: 42px;
-    background: var(--accent);
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
-  }
-  .header-title {
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 700;
-    font-size: 16px;
-    letter-spacing: 0.5px;
-  }
-  .header-sub {
-    color: var(--muted);
-    font-size: 12px;
-    margin-top: 2px;
-  }
+/* ─── Hero ─────────────────────────────────────────────────────────── */
+.hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 26px;
+  padding: 20px;
+  margin-bottom: 14px;
+  background: linear-gradient(150deg, rgba(255,212,0,0.07) 0%, rgba(255,212,0,0.015) 100%),
+              rgba(18,18,20,0.97);
+  border: 1px solid var(--border);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.55), 0 0 0 0.5px rgba(255,212,0,0.06);
+  animation: fadeUp .45s ease both;
+}
 
-  /* Progress */
-  .progress-wrap {
-    margin-bottom: 20px;
-  }
-  .progress-labels {
-    display: flex;
-    justify-content: space-between;
-    font-size: 11px;
-    color: var(--muted);
-    margin-bottom: 6px;
-    font-family: 'JetBrains Mono', monospace;
-  }
-  .progress-bar-outer {
-    height: 4px;
-    background: var(--border);
-    border-radius: 99px;
-    overflow: hidden;
-  }
-  .progress-bar-inner {
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent2), var(--accent));
-    border-radius: 99px;
-    transition: width 0.4s ease;
-  }
+.hero::after {
+  content: '';
+  position: absolute;
+  top: -1px; left: 50%;
+  transform: translateX(-50%);
+  width: 110px; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,212,0,0.55), transparent);
+}
 
-  /* Section */
-  .section {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px;
-    margin-bottom: 12px;
-  }
-  .section-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    color: var(--accent);
-    text-transform: uppercase;
-    margin-bottom: 12px;
-  }
+.hero-row { display:flex; align-items:center; gap:14px; }
 
-  /* Field */
-  .field { margin-bottom: 14px; }
-  .field:last-child { margin-bottom: 0; }
-  .field-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--muted);
-    margin-bottom: 6px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .field-label .req { color: var(--accent); font-size: 10px; }
+.hero-icon {
+  width:58px; height:58px;
+  border-radius:17px;
+  background: linear-gradient(150deg, #ffe45c, #ffd400);
+  box-shadow: 0 8px 28px rgba(255,212,0,0.32);
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
 
-  input[type="text"], input[type="number"], textarea, select {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    padding: 10px 12px;
-    outline: none;
-    transition: border-color 0.2s;
-    -webkit-appearance: none;
-  }
-  input:focus, textarea:focus, select:focus {
-    border-color: var(--accent);
-  }
-  input.error, textarea.error {
-    border-color: var(--danger);
-  }
-  .error-msg {
-    color: var(--danger);
-    font-size: 11px;
-    margin-top: 4px;
-    display: none;
-  }
+.hero-title {
+  font-size:24px;
+  font-weight:800;
+  letter-spacing:-.04em;
+  line-height:1.1;
+}
+.hero-sub {
+  margin-top:4px;
+  font-size:12.5px;
+  color:var(--muted);
+  font-weight:500;
+}
 
-  /* Toggle buttons */
-  .toggle-group {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .toggle-btn {
-    flex: 1;
-    min-width: 80px;
-    padding: 9px 12px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--muted);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.2s;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .toggle-btn.active {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #000;
-    font-weight: 700;
-  }
-  .toggle-btn:active { opacity: 0.8; }
+.hero-pill {
+  margin-top:16px;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:7px 13px;
+  border-radius:999px;
+  background:var(--yellow-dim);
+  border:1px solid rgba(255,212,0,0.14);
+  color:var(--yellow-light);
+  font-size:11.5px;
+  font-weight:700;
+  letter-spacing:.01em;
+}
+.dot {
+  width:6px; height:6px;
+  border-radius:50%;
+  background:var(--success);
+  box-shadow:0 0 5px var(--success);
+}
 
-  /* Custom input reveal */
-  .custom-input-wrap {
-    margin-top: 10px;
-    display: none;
-  }
-  .custom-input-wrap.visible { display: block; }
+/* ─── Progress ──────────────────────────────────────────────────────── */
+.progress { margin-bottom:14px; }
+.progress-top {
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:7px;
+  font-size:12px; color:var(--muted); font-weight:500;
+}
+.prog-pct { color:var(--yellow); font-weight:700; font-size:13px; }
+.progress-bar {
+  height:7px;
+  background:rgba(255,255,255,0.04);
+  border-radius:999px;
+  overflow:hidden;
+}
+.progress-fill {
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg, #d97b00, #ffd400, #ffe76a);
+  box-shadow:0 0 10px rgba(255,212,0,0.28);
+  transition:width .45s cubic-bezier(.4,0,.2,1);
+  width:0%;
+}
 
-  /* Axle section */
-  #axle-section {
-    display: none;
-  }
-  #axle-section.visible {
-    display: block;
-  }
+/* ─── Section ───────────────────────────────────────────────────────── */
+.section {
+  background: linear-gradient(170deg, rgba(255,255,255,0.026), rgba(255,255,255,0.010));
+  border-radius:22px;
+  padding:20px;
+  margin-bottom:11px;
+  border:1px solid rgba(255,255,255,0.048);
+  box-shadow:0 10px 28px rgba(0,0,0,0.38);
+  animation:fadeUp .45s ease both;
+}
 
-  /* Route textarea */
-  textarea {
-    resize: none;
-    height: 72px;
-  }
+.sec-title {
+  font-size:16px; font-weight:700;
+  letter-spacing:-.02em;
+  margin-bottom:14px;
+  display:flex; align-items:center; gap:7px;
+}
 
-  /* Hint */
-  .hint {
-    font-size: 11px;
-    color: var(--muted);
-    margin-top: 5px;
-    line-height: 1.5;
-  }
+/* ─── Field ─────────────────────────────────────────────────────────── */
+.field { margin-bottom:14px; }
+.field:last-child { margin-bottom:0; }
 
-  /* Submit button */
-  .submit-wrap {
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    padding: 12px 16px;
-    background: linear-gradient(to top, var(--bg) 70%, transparent);
-    z-index: 100;
-  }
-  .submit-btn {
-    width: 100%;
-    padding: 15px;
-    background: linear-gradient(135deg, var(--accent2), var(--accent));
-    border: none;
-    border-radius: var(--radius);
-    color: #000;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.1s;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .submit-btn:active { transform: scale(0.98); opacity: 0.9; }
-  .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.field-label {
+  margin-bottom:7px;
+  color:var(--muted);
+  font-size:12.5px;
+  font-weight:600;
+  letter-spacing:.01em;
+}
 
-  /* Divider */
-  .divider {
-    height: 1px;
-    background: var(--border);
-    margin: 14px 0;
-  }
+.sep {
+  height:1px;
+  background:rgba(255,255,255,0.038);
+  margin:14px 0;
+}
 
-  /* Success overlay */
-  .success-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: var(--bg);
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 32px;
-    z-index: 200;
-  }
-  .success-overlay.show { display: flex; }
-  .success-icon {
-    font-size: 64px;
-    margin-bottom: 20px;
-    animation: pop 0.5s ease;
-  }
-  .success-title {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--success);
-    margin-bottom: 8px;
-  }
-  .success-sub { color: var(--muted); line-height: 1.6; }
+/* ─── Inputs ────────────────────────────────────────────────────────── */
+input, textarea {
+  width:100%;
+  background:rgba(255,255,255,0.034);
+  border:1px solid rgba(255,255,255,0.055);
+  border-radius:14px;
+  color:var(--text);
+  min-height:52px;
+  padding:0 15px;
+  font-size:15px;
+  font-family:Inter, sans-serif;
+  font-weight:500;
+  outline:none;
+  -webkit-appearance:none;
+  appearance:none;
+  transition:border-color .2s, background .2s, box-shadow .2s;
+}
+textarea {
+  padding:13px 15px;
+  min-height:84px;
+  resize:none;
+  line-height:1.55;
+}
+input:focus, textarea:focus {
+  border-color:var(--border-focus);
+  background:rgba(255,255,255,0.048);
+  box-shadow:0 0 0 3px rgba(255,212,0,0.08);
+}
+input.err, textarea.err {
+  border-color:var(--danger);
+  box-shadow:0 0 0 3px rgba(255,77,77,0.10);
+}
 
-  @keyframes pop {
-    0% { transform: scale(0); }
-    70% { transform: scale(1.2); }
-    100% { transform: scale(1); }
-  }
+/* ─── Toggles ───────────────────────────────────────────────────────── */
+.tg {
+  display:flex; gap:5px;
+  padding:5px;
+  border-radius:16px;
+  background:rgba(255,255,255,0.028);
+  border:1px solid rgba(255,255,255,0.04);
+}
+.tb {
+  flex:1;
+  border-radius:12px;
+  border:none;
+  background:transparent;
+  color:var(--muted);
+  padding:11px 8px;
+  font-size:13px;
+  font-weight:700;
+  font-family:Inter, sans-serif;
+  cursor:pointer;
+  transition:background .2s, color .2s, transform .12s, box-shadow .2s;
+  white-space:nowrap;
+}
+.tb.on {
+  background:linear-gradient(150deg,#ffe45c,#ffd400);
+  color:#000;
+  box-shadow:0 6px 18px rgba(255,212,0,0.22);
+}
+.tb:active { transform:scale(.97); }
+
+/* ─── Custom input slot ─────────────────────────────────────────────── */
+.slot { margin-top:9px; display:none; }
+.slot.open { display:block; }
+
+/* ─── Axles ─────────────────────────────────────────────────────────── */
+.axles { margin-top:12px; display:none; }
+.axles.open { display:grid; gap:9px; }
+.axle-label {
+  margin-bottom:8px;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:600;
+}
+
+/* ─── Error text ─────────────────────────────────────────────────────── */
+.errtxt {
+  color:var(--danger);
+  font-size:11.5px;
+  font-weight:500;
+  margin-top:5px;
+  padding-left:3px;
+  display:none;
+}
+
+/* ─── Submit bar ────────────────────────────────────────────────────── */
+.submit-bar {
+  position:fixed;
+  left:0; right:0; bottom:0;
+  padding:12px 14px;
+  background:linear-gradient(to top, rgba(7,8,9,1) 50%, rgba(7,8,9,0));
+  backdrop-filter:blur(12px);
+  z-index:100;
+}
+.submit-btn {
+  width:100%;
+  height:60px;
+  border-radius:18px;
+  border:none;
+  background:linear-gradient(150deg, #ffe45c, #ffd400);
+  color:#000;
+  font-size:15.5px;
+  font-weight:800;
+  font-family:Inter, sans-serif;
+  letter-spacing:-.02em;
+  cursor:pointer;
+  box-shadow:0 10px 32px rgba(255,212,0,0.26), inset 0 1px 0 rgba(255,255,255,0.5);
+  transition:transform .14s, box-shadow .18s;
+}
+.submit-btn:active { transform:scale(.985); box-shadow:0 5px 14px rgba(255,212,0,0.18); }
+.submit-btn:disabled { opacity:.45; cursor:not-allowed; transform:none; }
+
+/* ─── Success overlay ───────────────────────────────────────────────── */
+.success {
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(7,8,9,0.96);
+  backdrop-filter:blur(22px);
+  z-index:200;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:32px;
+}
+.success.show { display:flex; }
+
+.success-ring {
+  width:86px; height:86px;
+  border-radius:50%;
+  background:rgba(62,207,114,0.12);
+  border:1.5px solid rgba(62,207,114,0.25);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:20px;
+  animation:popIn .5s cubic-bezier(.175,.885,.32,1.275) both;
+}
+.success-check { font-size:38px; line-height:1; }
+.success-title {
+  font-size:24px;
+  font-weight:800;
+  letter-spacing:-.04em;
+  color:var(--success);
+  margin-bottom:8px;
+}
+.success-sub {
+  color:var(--muted);
+  font-size:13.5px;
+  line-height:1.65;
+  max-width:240px;
+}
+
+/* ─── Keyframes ─────────────────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(14px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes popIn {
+  from { opacity:0; transform:scale(0.4); }
+  to   { opacity:1; transform:scale(1); }
+}
+
+@media (max-width:400px) {
+  .hero-title { font-size:20px; }
+  .section { padding:16px; }
+  .tb { font-size:12px; padding:10px 6px; }
+}
 </style>
 </head>
 <body>
+<div class="container">
 
-<!-- Header -->
-<div class="header">
-  <div class="header-icon">🚛</div>
-  <div>
-    <div class="header-title">PERMIT REQUEST</div>
-    <div class="header-sub">OS/OW — Fill all fields below</div>
-  </div>
-</div>
-
-<!-- Progress -->
-<div class="progress-wrap">
-  <div class="progress-labels">
-    <span id="progress-label">Step 1 of 4</span>
-    <span id="progress-pct">0%</span>
-  </div>
-  <div class="progress-bar-outer">
-    <div class="progress-bar-inner" id="progress-bar" style="width:0%"></div>
-  </div>
-</div>
-
-<!-- SECTION 1: Commodity -->
-<div class="section">
-  <div class="section-label">📦 Commodity</div>
-  <div class="field">
-    <div class="field-label">What are you hauling? <span class="req">*</span></div>
-    <input type="text" id="commodity" placeholder="e.g. Front loader, Excavator, Generator…"/>
-    <div class="hint">Describe the load type</div>
-    <div class="error-msg" id="err-commodity">Please enter the commodity</div>
-  </div>
-</div>
-
-<!-- SECTION 2: Dimensions -->
-<div class="section">
-  <div class="section-label">📐 Dimensions</div>
-
-  <!-- Width -->
-  <div class="field">
-    <div class="field-label">Width <span class="req">*</span></div>
-    <div class="toggle-group">
-      <div class="toggle-btn" id="width-legal" onclick="selectToggle('width','Legal')">✅ Legal</div>
-      <div class="toggle-btn" id="width-custom" onclick="selectToggle('width','custom')">✏️ Custom</div>
+  <!-- ── Hero ── -->
+  <div class="hero">
+    <div class="hero-row">
+      <div class="hero-icon">
+        <!-- Clean truck SVG (replaces emoji) -->
+        <svg width="36" height="28" viewBox="0 0 36 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Trailer body -->
+          <rect x="0.5" y="5" width="21.5" height="14" rx="2.2" fill="rgba(0,0,0,0.82)"/>
+          <!-- Trailer ribs -->
+          <line x1="8" y1="5" x2="8" y2="19" stroke="rgba(255,255,255,0.07)" stroke-width="0.8"/>
+          <line x1="15" y1="5" x2="15" y2="19" stroke="rgba(255,255,255,0.07)" stroke-width="0.8"/>
+          <!-- OS/OW banner -->
+          <rect x="2" y="8.5" width="16" height="4.5" rx="0.8" fill="rgba(255,255,255,0.14)"/>
+          <text x="10" y="12.2" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="2.8" font-weight="900" fill="rgba(255,255,255,0.82)" letter-spacing="0.3">OS/OW</text>
+          <!-- Cab body -->
+          <rect x="22" y="8" width="12.5" height="11" rx="1.8" fill="rgba(0,0,0,0.82)"/>
+          <!-- Cab roof slope -->
+          <path d="M22 8 L32.5 5.5 L34.5 8 Z" fill="rgba(0,0,0,0.78)"/>
+          <!-- Windshield -->
+          <rect x="23.5" y="9" width="5.5" height="5" rx="1" fill="rgba(255,255,255,0.32)"/>
+          <!-- Headlight -->
+          <rect x="33.5" y="14" width="2" height="2.5" rx="0.6" fill="rgba(255,255,255,0.88)"/>
+          <!-- Wheels -->
+          <circle cx="6.5"  cy="22" r="3.5" fill="rgba(0,0,0,0.85)"/>
+          <circle cx="6.5"  cy="22" r="1.4" fill="rgba(255,255,255,0.18)"/>
+          <circle cx="15.5" cy="22" r="3.5" fill="rgba(0,0,0,0.85)"/>
+          <circle cx="15.5" cy="22" r="1.4" fill="rgba(255,255,255,0.18)"/>
+          <circle cx="27.5" cy="22" r="3.5" fill="rgba(0,0,0,0.85)"/>
+          <circle cx="27.5" cy="22" r="1.4" fill="rgba(255,255,255,0.18)"/>
+        </svg>
+      </div>
+      <div>
+        <div class="hero-title">Permit Request</div>
+        <div class="hero-sub">Oversize / Overweight — OS/OW</div>
+      </div>
     </div>
-    <div class="custom-input-wrap" id="width-input-wrap">
-      <input type="text" id="width-value" placeholder="e.g. 14'6&quot;  (min 8')"/>
-    </div>
-    <div class="error-msg" id="err-width">Please select or enter width</div>
+    <div class="hero-pill"><div class="dot"></div>Ready for submission</div>
   </div>
 
-  <div class="divider"></div>
-
-  <!-- Height -->
-  <div class="field">
-    <div class="field-label">Height <span class="req">*</span></div>
-    <div class="toggle-group">
-      <div class="toggle-btn" id="height-legal" onclick="selectToggle('height','Legal')">✅ Legal</div>
-      <div class="toggle-btn" id="height-custom" onclick="selectToggle('height','custom')">✏️ Custom</div>
+  <!-- ── Progress ── -->
+  <div class="progress">
+    <div class="progress-top">
+      <span>Form completion</span>
+      <span class="prog-pct" id="prog-pct">0%</span>
     </div>
-    <div class="custom-input-wrap" id="height-input-wrap">
-      <input type="text" id="height-value" placeholder="e.g. 13'6&quot;  (min 11')"/>
+    <div class="progress-bar">
+      <div class="progress-fill" id="prog-fill"></div>
     </div>
-    <div class="error-msg" id="err-height">Please select or enter height</div>
   </div>
 
-  <div class="divider"></div>
-
-  <!-- Length -->
-  <div class="field">
-    <div class="field-label">Length in the well <span class="req">*</span></div>
-    <div class="toggle-group">
-      <div class="toggle-btn" id="length-standard" onclick="selectToggle('length','Standard')">✅ Standard</div>
-      <div class="toggle-btn" id="length-extended" onclick="selectToggle('length','extended')">↔️ Extended</div>
-    </div>
-    <div class="custom-input-wrap" id="length-input-wrap">
-      <input type="text" id="length-value" placeholder="e.g. 53'  (min 29')"/>
-    </div>
-    <div class="error-msg" id="err-length">Please select or enter length</div>
-  </div>
-</div>
-
-<!-- SECTION 3: Weight -->
-<div class="section">
-  <div class="section-label">⚖️ Weight</div>
-  <div class="field">
-    <div class="field-label">Weight category <span class="req">*</span></div>
-    <div class="toggle-group">
-      <div class="toggle-btn" id="weight-legal" onclick="selectWeight('Legal')">✅ Legal</div>
-      <div class="toggle-btn" id="weight-overweight" onclick="selectWeight('Overweight')">⚠️ Overweight</div>
-    </div>
-    <div class="error-msg" id="err-weight">Please select weight category</div>
-  </div>
-
-  <!-- Axle weights (shown only if Overweight) -->
-  <div id="axle-section">
-    <div class="divider"></div>
+  <!-- ── 1. Commodity ── -->
+  <div class="section" style="animation-delay:.04s">
+    <div class="sec-title">📦 Commodity</div>
     <div class="field">
-      <div class="field-label">Steer axle weight (lbs) <span class="req">*</span></div>
-      <input type="number" id="steer" placeholder="e.g. 13100"/>
-      <div class="error-msg" id="err-steer">Please enter steer axle weight</div>
-    </div>
-    <div class="field">
-      <div class="field-label">Drives axle weight (lbs) <span class="req">*</span></div>
-      <input type="number" id="drives" placeholder="e.g. 35000"/>
-      <div class="error-msg" id="err-drives">Please enter drives axle weight</div>
-    </div>
-    <div class="field">
-      <div class="field-label">Trailer axle weight (lbs) <span class="req">*</span></div>
-      <input type="number" id="trailer" placeholder="e.g. 41000"/>
-      <div class="error-msg" id="err-trailer">Please enter trailer axle weight</div>
+      <div class="field-label">What are you hauling?</div>
+      <input type="text" id="commodity"
+             placeholder="e.g. Excavator, Front Loader, Generator…"
+             autocomplete="off"/>
+      <div class="errtxt" id="e-commodity">Please describe your load</div>
     </div>
   </div>
-</div>
 
-<!-- SECTION 4: Route -->
-<div class="section">
-  <div class="section-label">🗺️ Route Preference</div>
-  <div class="field">
-    <div class="toggle-group">
-      <div class="toggle-btn" id="route-nopref" onclick="selectRoute('No preference')">🔀 No preference</div>
-      <div class="toggle-btn" id="route-custom" onclick="selectRoute('custom')">✏️ My route</div>
+  <!-- ── 2. Dimensions ── -->
+  <div class="section" style="animation-delay:.08s">
+    <div class="sec-title">📐 Dimensions</div>
+
+    <!-- Width -->
+    <div class="field">
+      <div class="field-label">Width</div>
+      <div class="tg">
+        <button class="tb" id="w-legal"  onclick="pick('width','Legal')">✅ Legal</button>
+        <button class="tb" id="w-custom" onclick="pick('width','custom')">✏️ Custom</button>
+      </div>
+      <div class="slot" id="slot-width">
+        <input type="text" id="width-val" placeholder='e.g. 14&apos; 6"  (min 8&apos;)'
+               inputmode="decimal" autocomplete="off"/>
+      </div>
+      <div class="errtxt" id="e-width">Please select Legal or enter a width value</div>
     </div>
-    <div class="custom-input-wrap" id="route-input-wrap">
-      <textarea id="route-value" placeholder="e.g. I-10 W → TX-18 → US-285"></textarea>
+
+    <div class="sep"></div>
+
+    <!-- Height -->
+    <div class="field">
+      <div class="field-label">Height</div>
+      <div class="tg">
+        <button class="tb" id="h-legal"  onclick="pick('height','Legal')">✅ Legal</button>
+        <button class="tb" id="h-custom" onclick="pick('height','custom')">✏️ Custom</button>
+      </div>
+      <div class="slot" id="slot-height">
+        <input type="text" id="height-val" placeholder='e.g. 13&apos; 6"  (min 11&apos;)'
+               inputmode="decimal" autocomplete="off"/>
+      </div>
+      <div class="errtxt" id="e-height">Please select Legal or enter a height value</div>
     </div>
-    <div class="error-msg" id="err-route">Please choose a route option</div>
+
+    <div class="sep"></div>
+
+    <!-- Length -->
+    <div class="field">
+      <div class="field-label">Length in the well</div>
+      <div class="tg">
+        <button class="tb" id="l-standard" onclick="pick('length','Standard')">✅ Standard</button>
+        <button class="tb" id="l-extended" onclick="pick('length','extended')">↔️ Extended</button>
+      </div>
+      <div class="slot" id="slot-length">
+        <input type="text" id="length-val" placeholder="e.g. 53'  (29' minimum)"
+               inputmode="decimal" autocomplete="off"/>
+      </div>
+      <div class="errtxt" id="e-length">Please select Standard or enter a length</div>
+    </div>
   </div>
-</div>
 
-<!-- Submit -->
-<div class="submit-wrap">
-  <button class="submit-btn" id="submit-btn" onclick="submitForm()">
-    🚛 SUBMIT PERMIT REQUEST
+  <!-- ── 3. Weight ── -->
+  <div class="section" style="animation-delay:.12s">
+    <div class="sec-title">⚖️ Weight</div>
+    <div class="field">
+      <div class="tg">
+        <button class="tb" id="wt-legal" onclick="pickWeight('Legal')">✅ Legal</button>
+        <button class="tb" id="wt-ow"    onclick="pickWeight('Overweight')">⚠️ Overweight</button>
+      </div>
+      <div class="errtxt" id="e-weight">Please select Legal or Overweight</div>
+    </div>
+
+    <!-- Axle weights -->
+    <div class="axles" id="axles">
+      <div class="axle-label">Weight per axle (lbs)</div>
+      <div>
+        <input type="text" id="steer"   placeholder="e.g. 13,100 — Steer axle"   inputmode="numeric" autocomplete="off"/>
+        <div class="errtxt" id="e-steer">Enter steer axle weight</div>
+      </div>
+      <div>
+        <input type="text" id="drives"  placeholder="e.g. 35,000 — Drives axle"  inputmode="numeric" autocomplete="off"/>
+        <div class="errtxt" id="e-drives">Enter drives axle weight</div>
+      </div>
+      <div>
+        <input type="text" id="trailer" placeholder="e.g. 41,000 — Trailer axle" inputmode="numeric" autocomplete="off"/>
+        <div class="errtxt" id="e-trailer">Enter trailer axle weight</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 4. Route ── -->
+  <div class="section" style="animation-delay:.16s">
+    <div class="sec-title">🗺️ Route Preference</div>
+    <div class="field">
+      <div class="tg">
+        <button class="tb" id="r-nopref" onclick="pickRoute('No preference')">🔀 No preference</button>
+        <button class="tb" id="r-custom" onclick="pickRoute('custom')">✏️ Specify</button>
+      </div>
+      <div class="slot" id="slot-route">
+        <textarea id="route-val" placeholder="e.g. I-10 W → TX-18 → US-285"></textarea>
+      </div>
+      <div class="errtxt" id="e-route">Please choose a route option</div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<!-- ── Submit ── -->
+<div class="submit-bar">
+  <button class="submit-btn" id="sub-btn" onclick="handleSubmit()">
+    Submit Permit Request
   </button>
 </div>
 
-<!-- Success overlay -->
-<div class="success-overlay" id="success-overlay">
-  <div class="success-icon">✅</div>
-  <div class="success-title">Request Submitted!</div>
+<!-- ── Success ── -->
+<div class="success" id="success">
+  <div class="success-ring">
+    <span class="success-check">✓</span>
+  </div>
+  <div class="success-title">Submitted!</div>
   <div class="success-sub">Your permit request has been sent to dispatch.<br>We'll process it shortly.</div>
 </div>
 
 <script>
-  const tg = window.Telegram.WebApp;
-  tg.ready();
-  tg.expand();
+/* ──────────────────────────────────────────────────────────────────────────
+   Telegram Mini App init
+────────────────────────────────────────────────────────────────────────── */
+const tg = window.Telegram.WebApp;
+tg.ready();
+tg.expand();
 
-  // Apply Telegram theme colors if available
-  if (tg.colorScheme === 'light') {
-    document.documentElement.style.setProperty('--bg', '#f5f5f5');
-    document.documentElement.style.setProperty('--surface', '#ffffff');
-    document.documentElement.style.setProperty('--surface2', '#f0f0f0');
-    document.documentElement.style.setProperty('--border', '#e0e0e0');
-    document.documentElement.style.setProperty('--text', '#1a1a1a');
-    document.documentElement.style.setProperty('--muted', '#888888');
-  }
+/* ──────────────────────────────────────────────────────────────────────────
+   State
+────────────────────────────────────────────────────────────────────────── */
+const S = { width: null, height: null, length: null, weight: null, route: null };
 
-  // State
-  const state = {
-    width: null, height: null, length: null,
-    weight: null, route: null
-  };
+/* ──────────────────────────────────────────────────────────────────────────
+   Input filters
+   Dimension fields: digits, feet/inch symbols, dot, dash, slash, space
+   Numeric fields:   digits and comma only
+────────────────────────────────────────────────────────────────────────── */
+const NAV = ['Backspace','Delete','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Tab','Enter','Home','End'];
 
-  // ── Toggle helpers ──────────────────────────────────────────────────────────
-
-  function selectToggle(field, value) {
-    const isCustom = (value === 'custom' || value === 'extended');
-    const prefix = field === 'length' ? 'length' : field;
-    const btnId  = field === 'length'
-      ? (isCustom ? 'length-extended' : 'length-standard')
-      : (isCustom ? `${field}-custom`  : `${field}-legal`);
-
-    // Reset both buttons
-    document.querySelectorAll(`[id^="${prefix}-"]`).forEach(b => {
-      if (b.classList.contains('toggle-btn')) b.classList.remove('active');
-    });
-    document.getElementById(btnId).classList.add('active');
-
-    const wrap = document.getElementById(`${field}-input-wrap`);
-    if (isCustom) {
-      wrap.classList.add('visible');
-      state[field] = '__custom__';
-    } else {
-      wrap.classList.remove('visible');
-      state[field] = value;
+function dimFilter(el) {
+  const RE = /^[0-9'".\-\/\s]$/;
+  el.addEventListener('keydown', e => {
+    if (NAV.includes(e.key) || e.ctrlKey || e.metaKey) return;
+    if (!RE.test(e.key)) e.preventDefault();
+  });
+  el.addEventListener('paste', e => {
+    const txt = (e.clipboardData || window.clipboardData).getData('text');
+    if (!/^[0-9'".\-\/\s]+$/.test(txt)) {
+      e.preventDefault();
+      const clean = txt.replace(/[^0-9'".\-\/\s]/g, '');
+      if (clean) insertAt(el, clean);
     }
-    hideErr(field);
-    updateProgress();
-  }
+  });
+}
 
-  function selectWeight(value) {
-    document.getElementById('weight-legal').classList.remove('active');
-    document.getElementById('weight-overweight').classList.remove('active');
-    document.getElementById(`weight-${value.toLowerCase()}`).classList.add('active');
-    state.weight = value;
-    const axle = document.getElementById('axle-section');
-    if (value === 'Overweight') {
-      axle.classList.add('visible');
-    } else {
-      axle.classList.remove('visible');
-      ['steer','drives','trailer'].forEach(f => document.getElementById(f).value = '');
+function numFilter(el) {
+  const RE = /^[0-9,]$/;
+  el.addEventListener('keydown', e => {
+    if (NAV.includes(e.key) || e.ctrlKey || e.metaKey) return;
+    if (!RE.test(e.key)) e.preventDefault();
+  });
+  el.addEventListener('paste', e => {
+    const txt = (e.clipboardData || window.clipboardData).getData('text');
+    if (!/^[0-9,]+$/.test(txt)) {
+      e.preventDefault();
+      const clean = txt.replace(/[^0-9,]/g, '');
+      if (clean) insertAt(el, clean);
     }
-    hideErr('weight');
-    updateProgress();
+  });
+}
+
+function insertAt(el, text) {
+  const s = el.selectionStart;
+  el.value = el.value.slice(0, s) + text + el.value.slice(el.selectionEnd);
+  el.selectionStart = el.selectionEnd = s + text.length;
+}
+
+dimFilter(document.getElementById('width-val'));
+dimFilter(document.getElementById('height-val'));
+dimFilter(document.getElementById('length-val'));
+numFilter(document.getElementById('steer'));
+numFilter(document.getElementById('drives'));
+numFilter(document.getElementById('trailer'));
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Toggle helpers
+────────────────────────────────────────────────────────────────────────── */
+const BTN = {
+  width:  { a: 'w-legal',   b: 'w-custom'  },
+  height: { a: 'h-legal',   b: 'h-custom'  },
+  length: { a: 'l-standard',b: 'l-extended'},
+};
+
+function pick(field, value) {
+  const isCustom = (value === 'custom' || value === 'extended');
+  const ids = BTN[field];
+  document.getElementById(ids.a).classList.toggle('on', !isCustom);
+  document.getElementById(ids.b).classList.toggle('on',  isCustom);
+  document.getElementById('slot-' + field).classList.toggle('open', isCustom);
+  S[field] = isCustom ? 'custom' : value;
+  clrErr(field);
+  prog();
+  if (isCustom) setTimeout(() => document.getElementById(field + '-val').focus(), 120);
+}
+
+function pickWeight(v) {
+  document.getElementById('wt-legal').classList.toggle('on', v === 'Legal');
+  document.getElementById('wt-ow').classList.toggle('on',    v === 'Overweight');
+  S.weight = v;
+  const ax = document.getElementById('axles');
+  ax.classList.toggle('open', v === 'Overweight');
+  if (v === 'Legal') ['steer','drives','trailer'].forEach(id => {
+    document.getElementById(id).value = '';
+    clrErr(id);
+  });
+  clrErr('weight');
+  prog();
+}
+
+function pickRoute(v) {
+  const isCustom = v === 'custom';
+  document.getElementById('r-nopref').classList.toggle('on', !isCustom);
+  document.getElementById('r-custom').classList.toggle('on',  isCustom);
+  document.getElementById('slot-route').classList.toggle('open', isCustom);
+  S.route = v;
+  clrErr('route');
+  prog();
+  if (isCustom) setTimeout(() => document.getElementById('route-val').focus(), 120);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Progress
+────────────────────────────────────────────────────────────────────────── */
+function fieldFilled(f) {
+  if (!S[f]) return false;
+  if (S[f] === 'custom') return !!document.getElementById(f + '-val').value.trim();
+  return true;
+}
+
+function prog() {
+  let n = 0;
+  if (document.getElementById('commodity').value.trim()) n++;
+  if (fieldFilled('width'))  n++;
+  if (fieldFilled('height')) n++;
+  if (fieldFilled('length')) n++;
+  if (S.weight) {
+    if (S.weight === 'Overweight') {
+      if (['steer','drives','trailer'].every(id => document.getElementById(id).value.trim())) n++;
+    } else n++;
   }
-
-  function selectRoute(value) {
-    document.getElementById('route-nopref').classList.remove('active');
-    document.getElementById('route-custom').classList.remove('active');
-    const wrap = document.getElementById('route-input-wrap');
-    if (value === 'custom') {
-      document.getElementById('route-custom').classList.add('active');
-      wrap.classList.add('visible');
-      state.route = '__custom__';
-    } else {
-      document.getElementById('route-nopref').classList.add('active');
-      wrap.classList.remove('visible');
-      state.route = value;
-    }
-    hideErr('route');
-    updateProgress();
+  if (S.route) {
+    if (S.route === 'custom') { if (document.getElementById('route-val').value.trim()) n++; }
+    else n++;
   }
+  const pct = Math.round(n / 6 * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-pct').textContent  = pct + '%';
+}
 
-  // ── Progress ────────────────────────────────────────────────────────────────
+document.querySelectorAll('input, textarea').forEach(el => el.addEventListener('input', prog));
 
-  function countFilled() {
-    let n = 0;
-    if (document.getElementById('commodity').value.trim()) n++;
-    if (state.width && (state.width !== '__custom__' || document.getElementById('width-value').value.trim())) n++;
-    if (state.height && (state.height !== '__custom__' || document.getElementById('height-value').value.trim())) n++;
-    if (state.length && (state.length !== '__custom__' || document.getElementById('length-value').value.trim())) n++;
-    if (state.weight) n++;
-    if (state.route && (state.route !== '__custom__' || document.getElementById('route-value').value.trim())) n++;
-    return n;
-  }
+/* ──────────────────────────────────────────────────────────────────────────
+   Errors
+────────────────────────────────────────────────────────────────────────── */
+function showErr(field, msg) {
+  const el = document.getElementById('e-' + field);
+  if (el) { if (msg) el.textContent = msg; el.style.display = 'block'; }
+  const inp = document.getElementById(field) || document.getElementById(field + '-val');
+  if (inp) inp.classList.add('err');
+}
+function clrErr(field) {
+  const el = document.getElementById('e-' + field);
+  if (el) el.style.display = 'none';
+  const inp = document.getElementById(field) || document.getElementById(field + '-val');
+  if (inp) inp.classList.remove('err');
+}
 
-  function updateProgress() {
-    const total = 6;
-    const filled = countFilled();
-    const pct = Math.round(filled / total * 100);
-    document.getElementById('progress-bar').style.width = pct + '%';
-    document.getElementById('progress-pct').textContent = pct + '%';
-    document.getElementById('progress-label').textContent = `Step ${Math.min(filled+1, total)} of ${total}`;
-  }
+/* ──────────────────────────────────────────────────────────────────────────
+   Validation
+────────────────────────────────────────────────────────────────────────── */
+function validate() {
+  let ok = true;
 
-  // Live progress on typing
-  document.querySelectorAll('input, textarea').forEach(el => {
-    el.addEventListener('input', updateProgress);
+  // Commodity
+  if (!document.getElementById('commodity').value.trim()) {
+    showErr('commodity'); ok = false;
+  } else clrErr('commodity');
+
+  // Dimensions
+  ['width','height','length'].forEach(f => {
+    if (!S[f]) {
+      showErr(f, 'Please make a selection'); ok = false;
+    } else if (S[f] === 'custom') {
+      if (!document.getElementById(f + '-val').value.trim()) {
+        showErr(f, 'Please enter a value'); ok = false;
+      } else clrErr(f);
+    } else clrErr(f);
   });
 
-  // ── Validation ──────────────────────────────────────────────────────────────
-
-  function showErr(field, msg) {
-    const el = document.getElementById('err-' + field);
-    if (el) { if (msg) el.textContent = msg; el.style.display = 'block'; }
-    const inp = document.getElementById(field) || document.getElementById(field + '-value');
-    if (inp) inp.classList.add('error');
-  }
-
-  function hideErr(field) {
-    const el = document.getElementById('err-' + field);
-    if (el) el.style.display = 'none';
-    const inp = document.getElementById(field) || document.getElementById(field + '-value');
-    if (inp) inp.classList.remove('error');
-  }
-
-  function parseFeet(text) {
-    const m = text.trim().match(/^(\d+(?:\.\d+)?)/);
-    return m ? parseFloat(m[1]) : null;
-  }
-
-  function validateForm() {
-    let ok = true;
-
-    // Commodity
-    if (!document.getElementById('commodity').value.trim()) {
-      showErr('commodity'); ok = false;
-    } else hideErr('commodity');
-
-    // Width
-    if (!state.width) { showErr('width'); ok = false; }
-    else if (state.width === '__custom__') {
-      const v = document.getElementById('width-value').value.trim();
-      if (!v) { showErr('width', 'Please enter a width value'); ok = false; }
-      else {
-        const ft = parseFeet(v);
-        if (ft === null || ft < 8) { showErr('width', "Width must be at least 8'"); ok = false; }
-        else hideErr('width');
-      }
-    } else hideErr('width');
-
-    // Height
-    if (!state.height) { showErr('height'); ok = false; }
-    else if (state.height === '__custom__') {
-      const v = document.getElementById('height-value').value.trim();
-      if (!v) { showErr('height', 'Please enter a height value'); ok = false; }
-      else {
-        const ft = parseFeet(v);
-        if (ft === null || ft < 11) { showErr('height', "Height must be at least 11'"); ok = false; }
-        else hideErr('height');
-      }
-    } else hideErr('height');
-
-    // Length
-    if (!state.length) { showErr('length'); ok = false; }
-    else if (state.length === '__custom__') {
-      const v = document.getElementById('length-value').value.trim();
-      if (!v) { showErr('length', 'Please enter a length value'); ok = false; }
-      else {
-        const ft = parseFeet(v);
-        if (ft === null || ft < 29) { showErr('length', "Length must be at least 29'"); ok = false; }
-        else hideErr('length');
-      }
-    } else hideErr('length');
-
-    // Weight
-    if (!state.weight) { showErr('weight'); ok = false; }
-    else {
-      hideErr('weight');
-      if (state.weight === 'Overweight') {
-        ['steer','drives','trailer'].forEach(ax => {
-          const v = document.getElementById(ax).value.trim();
-          if (!v || isNaN(parseInt(v))) { showErr(ax); ok = false; }
-          else hideErr(ax);
-        });
-      }
+  // Weight
+  if (!S.weight) {
+    showErr('weight', 'Please select Legal or Overweight'); ok = false;
+  } else {
+    clrErr('weight');
+    if (S.weight === 'Overweight') {
+      ['steer','drives','trailer'].forEach(id => {
+        if (!document.getElementById(id).value.trim()) {
+          showErr(id); ok = false;
+        } else clrErr(id);
+      });
     }
-
-    // Route
-    if (!state.route) { showErr('route'); ok = false; }
-    else if (state.route === '__custom__') {
-      const v = document.getElementById('route-value').value.trim();
-      if (!v) { showErr('route', 'Please type your route'); ok = false; }
-      else hideErr('route');
-    } else hideErr('route');
-
-    return ok;
   }
 
-  // ── Build payload ───────────────────────────────────────────────────────────
+  // Route
+  if (!S.route) {
+    showErr('route', 'Please choose a route option'); ok = false;
+  } else if (S.route === 'custom') {
+    if (!document.getElementById('route-val').value.trim()) {
+      showErr('route', 'Please enter your route'); ok = false;
+    } else clrErr('route');
+  } else clrErr('route');
 
-  function buildPayload() {
-    const get = id => document.getElementById(id).value.trim();
+  return ok;
+}
 
-    const width  = state.width  === '__custom__' ? get('width-value')  : state.width;
-    const height = state.height === '__custom__' ? get('height-value') : state.height;
-    const length = state.length === '__custom__' ? get('length-value') : state.length;
-    const route  = state.route  === '__custom__' ? get('route-value')  : state.route;
-
-    const payload = {
-      commodity: get('commodity'),
-      width, height, length,
-      weight: state.weight,
-      route,
-    };
-
-    if (state.weight === 'Overweight') {
-      payload.steer   = get('steer');
-      payload.drives  = get('drives');
-      payload.trailer = get('trailer');
-      const total = parseInt(payload.steer||0) + parseInt(payload.drives||0) + parseInt(payload.trailer||0);
-      payload.gross = total.toLocaleString() + ' lbs';
-    }
-
-    return payload;
+/* ──────────────────────────────────────────────────────────────────────────
+   Build payload — keys must match what main.py expects
+────────────────────────────────────────────────────────────────────────── */
+function buildPayload() {
+  const g = id => document.getElementById(id).value.trim();
+  const payload = {
+    commodity: g('commodity'),
+    width:     S.width  === 'custom'   ? g('width-val')  : S.width,
+    height:    S.height === 'custom'   ? g('height-val') : S.height,
+    length:    S.length === 'custom'   ? g('length-val') : S.length,
+    weight:    S.weight,
+    route:     S.route  === 'custom'   ? g('route-val')  : S.route,
+  };
+  if (S.weight === 'Overweight') {
+    payload.steer   = g('steer');
+    payload.drives  = g('drives');
+    payload.trailer = g('trailer');
+    const total = [payload.steer, payload.drives, payload.trailer]
+      .reduce((sum, v) => sum + (parseInt(v.replace(/,/g, '')) || 0), 0);
+    payload.gross = total.toLocaleString() + ' lbs';
   }
+  return payload;
+}
 
-  // ── Submit ──────────────────────────────────────────────────────────────────
-
-  function submitForm() {
-    if (!validateForm()) {
-      // Scroll to first error
-      const firstErr = document.querySelector('.error-msg[style*="block"]');
-      if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      return;
-    }
-
-    const btn = document.getElementById('submit-btn');
-    btn.disabled = true;
-    btn.textContent = '⏳ Sending…';
-
-    const payload = buildPayload();
-    tg.sendData(JSON.stringify(payload));
-
-    // Show success
-    setTimeout(() => {
-      document.getElementById('success-overlay').classList.add('show');
-      setTimeout(() => tg.close(), 2000);
-    }, 300);
+/* ──────────────────────────────────────────────────────────────────────────
+   Submit
+────────────────────────────────────────────────────────────────────────── */
+function handleSubmit() {
+  if (!validate()) {
+    const firstErr = document.querySelector('.errtxt[style*="block"]');
+    if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
   }
+  const btn = document.getElementById('sub-btn');
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+
+  const payload = buildPayload();
+
+  // Show success screen, then send data (sendData closes the Mini App)
+  document.getElementById('success').classList.add('show');
+  setTimeout(() => tg.sendData(JSON.stringify(payload)), 1500);
+}
 </script>
 </body>
 </html>
