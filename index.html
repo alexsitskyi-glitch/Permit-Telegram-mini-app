@@ -385,6 +385,16 @@ input.err, textarea.err {
              autocomplete="off"/>
       <div class="errtxt" id="e-commodity">Please describe your load</div>
     </div>
+
+    <div class="sep"></div>
+
+    <div class="field">
+      <div class="field-label">Truck #</div>
+      <input type="text" id="truck-number"
+             placeholder="e.g. 396"
+             inputmode="numeric" autocomplete="off"/>
+      <div class="errtxt" id="e-truck-number">Please enter your truck number</div>
+    </div>
   </div>
 
   <!-- ── 2. Dimensions ── -->
@@ -552,6 +562,22 @@ function numFilter(el) {
   });
 }
 
+function truckFilter(el) {
+  const RE = /^[0-9]$/;
+  el.addEventListener('keydown', e => {
+    if (NAV.includes(e.key) || e.ctrlKey || e.metaKey) return;
+    if (!RE.test(e.key)) e.preventDefault();
+  });
+  el.addEventListener('paste', e => {
+    const txt = (e.clipboardData || window.clipboardData).getData('text');
+    if (!/^[0-9]+$/.test(txt)) {
+      e.preventDefault();
+      const clean = txt.replace(/[^0-9]/g, '');
+      if (clean) insertAt(el, clean);
+    }
+  });
+}
+
 function insertAt(el, text) {
   const s = el.selectionStart;
   el.value = el.value.slice(0, s) + text + el.value.slice(el.selectionEnd);
@@ -564,6 +590,7 @@ dimFilter(document.getElementById('length-val'));
 numFilter(document.getElementById('steer'));
 numFilter(document.getElementById('drives'));
 numFilter(document.getElementById('trailer'));
+truckFilter(document.getElementById('truck-number'));
 
 /* ──────────────────────────────────────────────────────────────────────────
    Toggle helpers
@@ -623,6 +650,7 @@ function fieldFilled(f) {
 function prog() {
   let n = 0;
   if (document.getElementById('commodity').value.trim()) n++;
+  if (document.getElementById('truck-number').value.trim()) n++;
   if (fieldFilled('width'))  n++;
   if (fieldFilled('height')) n++;
   if (fieldFilled('length')) n++;
@@ -635,7 +663,7 @@ function prog() {
     if (S.route === 'custom') { if (document.getElementById('route-val').value.trim()) n++; }
     else n++;
   }
-  const pct = Math.round(n / 6 * 100);
+  const pct = Math.round(n / 7 * 100);
   document.getElementById('prog-fill').style.width = pct + '%';
   document.getElementById('prog-pct').textContent  = pct + '%';
 }
@@ -668,6 +696,11 @@ function validate() {
   if (!document.getElementById('commodity').value.trim()) {
     showErr('commodity'); ok = false;
   } else clrErr('commodity');
+
+  // Truck #
+  if (!document.getElementById('truck-number').value.trim()) {
+    showErr('truck-number'); ok = false;
+  } else clrErr('truck-number');
 
   // Dimensions
   ['width','height','length'].forEach(f => {
@@ -712,12 +745,13 @@ function validate() {
 function buildPayload() {
   const g = id => document.getElementById(id).value.trim();
   const payload = {
-    commodity: g('commodity'),
-    width:     S.width  === 'custom'   ? g('width-val')  : S.width,
-    height:    S.height === 'custom'   ? g('height-val') : S.height,
-    length:    S.length === 'custom'   ? g('length-val') : S.length,
-    weight:    S.weight,
-    route:     S.route  === 'custom'   ? g('route-val')  : S.route,
+    commodity:    g('commodity'),
+    truck_number: g('truck-number'),
+    width:        S.width  === 'custom'   ? g('width-val')  : S.width,
+    height:       S.height === 'custom'   ? g('height-val') : S.height,
+    length:       S.length === 'custom'   ? g('length-val') : S.length,
+    weight:       S.weight,
+    route:        S.route  === 'custom'   ? g('route-val')  : S.route,
   };
   if (S.weight === 'Overweight') {
     payload.steer   = g('steer');
